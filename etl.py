@@ -62,6 +62,12 @@ def process_immigration_data(spark, input_data):
             col_name, immigration_df[col_name].cast(IntegerType())
         )
 
+    #  Drop duplicate by excluding cicid
+    immigration_df = immigration_df.drop("cicid")
+    immigration_df = immigration_df.dropDuplicates()
+    immigration_df = immigration_df.withColumn("cicid", monotonically_increasing_id())
+
+
 def main():
     spark = create_spark_session()
     input_data = "./data"
