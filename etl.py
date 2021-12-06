@@ -96,6 +96,31 @@ def process_immigration_data(spark, input_data):
         "visa_status", get_visa_udf(immigration_df.i94visa)
     )
 
+    # Exclude unused columns
+    unused_cols = [
+        "i94yr",
+        "i94mon",
+        "count",
+        "fltno",
+        "insnum",
+        "entdepd",
+        "biryear",
+        "dtadfile",
+        "biryear",
+        "visapost",
+        "entdepu",
+        "admnum",
+        "i94cit",
+        "i94res",
+        "i94port",
+        "i94addr",
+        "i94mode",
+        "i94visa",
+        "entdepa",
+        "dtaddto",
+    ]
+    immigration_df = immigration_df.drop(*unused_cols)
+
     # Rename columns
     immigration_df = (
         immigration_df.withColumnRenamed("arrdate", "arrival_date")
@@ -104,6 +129,7 @@ def process_immigration_data(spark, input_data):
         .withColumnRenamed("occup", "occupation")
         .withColumnRenamed("matflag", "matched_flag")
     )
+
     return immigration_df
 
 
