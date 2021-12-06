@@ -96,6 +96,14 @@ def process_immigration_data(spark, input_data):
         "visa_status", get_visa_udf(immigration_df.i94visa)
     )
 
+    # Rename columns
+    immigration_df = (
+        immigration_df.withColumnRenamed("arrdate", "arrival_date")
+        .withColumnRenamed("depdate", "departure_date")
+        .withColumnRenamed("i94bir", "age")
+        .withColumnRenamed("occup", "occupation")
+        .withColumnRenamed("matflag", "matched_flag")
+    )
     return immigration_df
 
 
