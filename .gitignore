@@ -6,8 +6,9 @@ __pycache__/
 # C extensions
 *.so
 
-# Directory
+# Custom
 data/
+dl.cfg
 
 # Distribution / packaging
 .Python
