@@ -148,7 +148,12 @@ def process_immigration_data(spark, input_data):
             "airline",
         ]
     )
-    
+
+    # Convert arrival_date and departure_date in proper format
+    immigration_df = immigration_df.withColumn(
+        "arrival_date", udf_datetime_from_sas(immigration_df.arrival_date)
+    ).withColumn("departure_date", udf_datetime_from_sas(immigration_df.departure_date))
+
     return immigration_df
 
 
