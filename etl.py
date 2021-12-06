@@ -37,9 +37,35 @@ def create_spark_session():
     return spark
 
 
+def process_immigration_data(spark, input_data):
+
+    # Read data from the s3
+    input_data = os.path.join(
+        input_data,
+        "sas_data/part-00000-b9542815-7a8d-45fc-9c67-c9c5007ad0d4-c000.snappy.parquet",
+    )
+    immigration_df = spark.read.parquet(input_data)
+
+    # Convert decimal columns to integer
+    int_cols = [
+        "cicid",
+        "i94cit",
+        "i94res",
+        "arrdate",
+        "i94mode",
+        "depdate",
+        "i94bir",
+        "i94visa",
+    ]
+    for col_name in int_cols:
+        immigration_df = immigration_df.withColumn(
+            col_name, immigration_df[col_name].cast(IntegerType())
+        )
+
 def main():
     spark = create_spark_session()
     input_data = "./data"
+    process_immigration_data(spark=spark, input_data=input_data)
 
 
 if __name__ == "__main__":
