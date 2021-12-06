@@ -17,7 +17,7 @@ from pyspark.sql.functions import (
     trim,
     col,
 )
-
+from custom_udf import *
 
 config = configparser.ConfigParser()
 config.read("dl.cfg")
@@ -69,6 +69,34 @@ def process_immigration_data(spark, input_data):
 
     # Assign 0 to null values for integer
     immigration_df = immigration_df.fillna(0, int_cols)
+
+    # Assign real values
+    # Retrieve transporation mode using i94mode
+    immigration_df = immigration_df.withColumn(
+        "transportation_mode", get_mode_udf(immigration_df.i94mode)
+    )
+
+    # Retrieve arrived city
+    immigration_df = immigration_df.withColumn(
+        "arrived_city", get_city_udf(immigration_df.i94port)
+    )
+
+    # Retrieve us_address
+    immigration_df = immigration_df.withColumn(
+        "us_address", get_state_udf(immigration_df.i94addr)
+    )
+
+    # Retrieve origin city and travelled from using i94CIT and i94res
+    immigration_df = immigration_df.withColumn(
+        "origin_city", get_origin_udf(immigration_df.i94cit)
+    ).withColumn("traveled_from", get_origin_udf(immigration_df.i94res))
+
+    # Retrive i94visa with value
+    immigration_df = immigration_df.withColumn(
+        "visa_status", get_visa_udf(immigration_df.i94visa)
+    )
+
+    return immigration_df
 
 
 def main():
