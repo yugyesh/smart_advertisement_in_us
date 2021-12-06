@@ -67,6 +67,9 @@ def process_immigration_data(spark, input_data):
     immigration_df = immigration_df.dropDuplicates()
     immigration_df = immigration_df.withColumn("cicid", monotonically_increasing_id())
 
+    # Assign 0 to null values for integer
+    immigration_df = immigration_df.fillna(0, int_cols)
+
 
 def main():
     spark = create_spark_session()
