@@ -130,6 +130,25 @@ def process_immigration_data(spark, input_data):
         .withColumnRenamed("matflag", "matched_flag")
     )
 
+    # Order the columns in proper sequence
+    immigration_df = immigration_df.select(
+        [
+            "cicid",
+            "origin_city",
+            "traveled_from",
+            "arrived_city",
+            "us_address",
+            "arrival_date",
+            "departure_date",
+            "transportation_mode",
+            "age",
+            "gender",
+            "visa_status",
+            "occupation",
+            "airline",
+        ]
+    )
+    
     return immigration_df
 
 
