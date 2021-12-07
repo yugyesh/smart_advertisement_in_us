@@ -320,6 +320,9 @@ def process_airports_data(spark, input_data, output_data):
     # Rename munacipality to city
     airport_df = airport_df.withColumnRenamed("municipality", "city")
 
+    # Reorder columns
+    airport_df = airport_df.select(["airport_id", "name", "city", "state", "type"])
+
 
 def main():
     spark = create_spark_session()
