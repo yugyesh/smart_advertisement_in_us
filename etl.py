@@ -182,7 +182,7 @@ def process_cities_demographics(spark, input_data, output_data):
     # Read data from the s3
     input_data = os.path.join(
         input_data,
-        "sas_data/part-00000-b9542815-7a8d-45fc-9c67-c9c5007ad0d4-c000.snappy.parquet",
+        "us_cities_demographics.csv",
     )
     demographic_df = spark.read.csv(input_data, inferSchema=True, header=True, sep=";")
 
@@ -209,11 +209,31 @@ def process_cities_demographics(spark, input_data, output_data):
     # Droping duplicates
     demographic_df = demographic_df.dropDuplicates()
 
+    # Convert columns name
+    demographic_df = demographic_df.toDF(
+        "city",
+        "state",
+        "male_population",
+        "female_population",
+        "total_population",
+        "american_indian_alaska_native",
+        "asian",
+        "black_african_american",
+        "hispanic_latino",
+        "white",
+    )
+
+    return demographic_df
+
 
 def main():
     spark = create_spark_session()
     input_data = "./data"
     process_immigration_data(
+        spark=spark, input_data=input_data, output_data="/data/processed_data/"
+    )
+
+    process_cities_demographics(
         spark=spark, input_data=input_data, output_data="/data/processed_data/"
     )
 
