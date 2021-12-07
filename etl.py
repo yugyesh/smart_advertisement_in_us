@@ -223,6 +223,23 @@ def process_cities_demographics(spark, input_data, output_data):
         "white",
     )
 
+    # Fill null with 0 for integer columns
+    num_cols = [
+        "male_population",
+        "female_population",
+        "total_population",
+        "american_indian_alaska_native",
+        "asian",
+        "black_african_american",
+        "hispanic_latino",
+        "white",
+    ]
+    demographic_df = demographic_df.fillna(0, num_cols)
+
+    demographic_df = demographic_df.withColumn(
+        "demographic_id", monotonically_increasing_id()
+    )
+
     return demographic_df
 
 
