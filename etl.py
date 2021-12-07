@@ -57,6 +57,8 @@ def process_immigration_data(spark, input_data, output_data):
     """
 
     # Read data from the s3
+    # TODO: Exceptional handline while reading files
+    # TODO: Give sas folder from the environment variable or json file
     input_data = os.path.join(
         input_data,
         "sas_data/part-00000-b9542815-7a8d-45fc-9c67-c9c5007ad0d4-c000.snappy.parquet",
@@ -172,10 +174,10 @@ def process_immigration_data(spark, input_data, output_data):
     ).withColumn("departure_date", udf_datetime_from_sas(immigration_df.departure_date))
 
     # Write parquet data to parking
+    # TODO: Automatically create bucket if not exists
     immigration_df.write.mode("overwrite").parquet(
         os.path.join(output_data, "immigration")
     )
-    return immigration_df
 
 
 def process_cities_demographics(spark, input_data, output_data):
@@ -271,20 +273,129 @@ def process_cities_demographics(spark, input_data, output_data):
         ]
     )
 
-    # TODO: Partation the data
-    demographic_df.write.mode("overwrite").parquet(output_data)
+    # TODO: Partition the data
+    demographic_df.write.mode("overwrite").parquet(
+        os.path.join(output_data, "demographic")
+    )
+
+
+def process_airports_data(spark, input_data, output_data):
+    """This method transforms the airports data using following steps:
+        - Remove extra whitespace in column
+        - Exclude airport outside of US
+        - Dropping duplicate by excluding ident
+        - Remove unwanted cols
+        - Dropping duplicate by excluding ident
+        - Rename municipality to city
+        - Reorder the columns
+        - remove whitespace from all the data
+        - filter out closed, balloon and heliport types
+    Args:
+        [Object]: pyspark.sql.session.SparkSession object
+        input_data (string): path of s3 for input json file
+        output_data (string): s3 path to write parquet tables
+    """
+    # Read data from the s3
+    # TODO: Take filename from environment
+    input_data = os.path.join(
+        input_data,
+        "airport_codes.csv",
+    )
+    airport_df = spark.read.csv(input_data, header=True, sep=",")
+
+    # Remove extra whitespace in column
+    airport_df = airport_df.select(
+        [F.col(col).alias(col.replace(" ", "")) for col in airport_df.columns]
+    )
+
+    # Exclude airports outside of us
+    airport_df = airport_df.filter(airport_df.iso_country.like("%US%"))
+
+    # Create state column code using iso_region
+    airport_df = airport_df.withColumn("state_code", get_state_code_udf("iso_region"))
+
+    # Retrive state_name from state code
+    airport_df = airport_df.withColumn("state", get_state_udf(airport_df.state_code))
+
+    # Remove unwanted columns
+    airport_delete_cols = [
+        "elevation_ft",
+        "continent",
+        "iso_country",
+        "iso_region",
+        "gps_code",
+        "iata_code",
+        "local_code",
+        "coordinates",
+        "state_code",
+    ]
+    airport_df = airport_df.drop(*airport_delete_cols)
+
+    # Dropping duplicate by excluding ident
+    airport_df = airport_df.dropDuplicates()
+    airport_df = airport_df.withColumn("airport_id", monotonically_increasing_id())
+
+    # Rename munacipality to city
+    airport_df = airport_df.withColumnRenamed("municipality", "city")
+
+    # Reorder columns
+    airport_df = airport_df.select(["airport_id", "name", "city", "state", "type"])
+
+    # Remove unwanted space from the column value
+    airport_df = (
+        airport_df.withColumn(
+            "name",
+            remove_whitespace_udf(airport_df.name)
+            if airport_df.name.isNotNull
+            else airport_df.name,
+        )
+        .withColumn(
+            "city",
+            remove_whitespace_udf(airport_df.city)
+            if airport_df.city.isNotNull
+            else airport_df.city,
+        )
+        .withColumn(
+            "state",
+            remove_whitespace_udf(airport_df.state)
+            if airport_df.state.isNotNull
+            else airport_df.state,
+        )
+        .withColumn(
+            "type",
+            remove_whitespace_udf(airport_df.type)
+            if airport_df.type.isNotNull
+            else airport_df.type,
+        )
+    )
+
+    # Exclude unused airport
+    used_airports = [
+        "seaplane_base",
+        "medium_airport",
+        "small_airport",
+        "large_airport",
+    ]
+    airport_df = airport_df.filter(airport_df.type.isin(used_airports))
+
+    # Write data to parquet file
+    # TODO: Partition the data
+    airport_df.write.mode("overwrite").parquet(os.path.join(output_data, "airport"))
 
 
 def main():
     spark = create_spark_session()
     input_data = "./data"
+    output_data = "./data/processed_data/"
     process_immigration_data(
-        spark=spark, input_data=input_data, output_data="/data/processed_data/"
+        spark=spark, input_data=input_data, output_data=output_data
     )
 
     process_cities_demographics(
-        spark=spark, input_data=input_data, output_data="/data/processed_data/"
+        spark=spark, input_data=input_data, output_data=output_data
     )
+
+    process_airports_data(spark=spark, input_data=input_data, output_data=output_data)
 
 
 if __name__ == "__main__":
