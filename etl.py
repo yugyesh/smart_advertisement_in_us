@@ -271,8 +271,10 @@ def process_cities_demographics(spark, input_data, output_data):
         ]
     )
 
-    # TODO: Partation the data
-    demographic_df.write.mode("overwrite").parquet(output_data)
+    # TODO: Partition the data
+    demographic_df.write.mode("overwrite").parquet(
+        os.path.join(output_data, "demographic")
+    )
 
 
 def process_airports_data(spark, input_data, output_data):
@@ -322,6 +324,10 @@ def process_airports_data(spark, input_data, output_data):
 
     # Reorder columns
     airport_df = airport_df.select(["airport_id", "name", "city", "state", "type"])
+
+    # Write data to parquet file
+    # TODO: Partition the data
+    airport_df.write.mode("overwrite").parquet(os.path.join(output_data, "demographic"))
 
 
 def main():
