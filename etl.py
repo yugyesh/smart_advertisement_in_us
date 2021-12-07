@@ -240,6 +240,22 @@ def process_cities_demographics(spark, input_data, output_data):
         "demographic_id", monotonically_increasing_id()
     )
 
+    # Reorder the schema
+    demographic_df = demographic_df.select(
+        [
+            "demographic_id",
+            "city",
+            "state",
+            "american_indian_alaska_native",
+            "asian",
+            "black_african_american",
+            "hispanic_latino",
+            "white",
+            "male_population",
+            "female_population",
+            "total_population",
+        ]
+    )
     return demographic_df
 
 
