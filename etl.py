@@ -256,7 +256,9 @@ def process_cities_demographics(spark, input_data, output_data):
             "total_population",
         ]
     )
-    return demographic_df
+
+    # TODO: Partation the data
+    demographic_df.write.mode("overwrite").parquet(output_data)
 
 
 def main():
