@@ -38,12 +38,19 @@ def create_spark_session():
 
 
 def process_immigration_data(spark, input_data, output_data):
-    """[summary]
+    """This method transfors the immigration data using following steps:
+        - Convert decimal columns to integer
+        - Drop duplicates excluding cicid
+        - Assign 0 to null values for integer
+        - Assign real values
+        - Rename columns
+        - Order the columns in proper sequence
+        - Convert arrival_date and departure_date in "YYYY-MM-DD" format
 
     Args:
-        spark ([type]): [description]
-        input_data ([type]): [description]
-        output_data ([type]): [description]
+        [Object]: pyspark.sql.session.SparkSession object
+        input_data (string): path of s3 for input json file
+        output_data (string): s3 path to write parquet tables
 
     Returns:
         [type]: [description]
@@ -171,10 +178,111 @@ def process_immigration_data(spark, input_data, output_data):
     return immigration_df
 
 
+def process_cities_demographics(spark, input_data, output_data):
+    """This method transforms the demographics data using following steps:
+        - Remove duplicate using pivoting column
+        - Remove unwanted columns from schema
+        - Dropping duplicate
+        - Convert column names
+        - Fill null with 0
+        - Append auto increment id column
+        - Reorder the schema
+
+    Args:
+        [Object]: pyspark.sql.session.SparkSession object
+        input_data (string): path of s3 for input json file
+        output_data (string): s3 path to write parquet tables
+    """
+    # Read data from the s3
+    input_data = os.path.join(
+        input_data,
+        "us_cities_demographics.csv",
+    )
+    demographic_df = spark.read.csv(input_data, inferSchema=True, header=True, sep=";")
+
+    # Remove duplicate using pivoting column
+    # Pivot column Race to different columns
+    pivot_cols = ["City", "State"]
+    pivot_df = demographic_df.groupBy(pivot_cols).pivot("Race").sum("Count")
+
+    # Joining the pivot
+    demographic_df = demographic_df.join(other=pivot_df, on=pivot_cols)
+
+    # Remove unwanted columns from schema
+    del_cols = [
+        "median age",
+        "Number of Veterans",
+        "foreign-born",
+        "Average Household Size",
+        "State Code",
+        "race",
+        "count",
+    ]
+    demographic_df = demographic_df.drop(*del_cols)
+
+    # Droping duplicates
+    demographic_df = demographic_df.dropDuplicates()
+
+    # Convert columns name
+    demographic_df = demographic_df.toDF(
+        "city",
+        "state",
+        "male_population",
+        "female_population",
+        "total_population",
+        "american_indian_alaska_native",
+        "asian",
+        "black_african_american",
+        "hispanic_latino",
+        "white",
+    )
+
+    # Fill null with 0 for integer columns
+    num_cols = [
+        "male_population",
+        "female_population",
+        "total_population",
+        "american_indian_alaska_native",
+        "asian",
+        "black_african_american",
+        "hispanic_latino",
+        "white",
+    ]
+    demographic_df = demographic_df.fillna(0, num_cols)
+
+    demographic_df = demographic_df.withColumn(
+        "demographic_id", monotonically_increasing_id()
+    )
+
+    # Reorder the schema
+    demographic_df = demographic_df.select(
+        [
+            "demographic_id",
+            "city",
+            "state",
+            "american_indian_alaska_native",
+            "asian",
+            "black_african_american",
+            "hispanic_latino",
+            "white",
+            "male_population",
+            "female_population",
+            "total_population",
+        ]
+    )
+
+    # TODO: Partation the data
+    demographic_df.write.mode("overwrite").parquet(output_data)
+
+
 def main():
     spark = create_spark_session()
     input_data = "./data"
     process_immigration_data(
+        spark=spark, input_data=input_data, output_data="/data/processed_data/"
+    )
+
+    process_cities_demographics(
         spark=spark, input_data=input_data, output_data="/data/processed_data/"
     )
 
