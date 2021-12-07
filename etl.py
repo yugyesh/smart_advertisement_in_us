@@ -171,6 +171,30 @@ def process_immigration_data(spark, input_data, output_data):
     return immigration_df
 
 
+def process_cities_demographics(spark, input_data, output_data):
+    """[summary]
+
+    Args:
+        spark ([type]): [description]
+        input_data ([type]): [description]
+        output_data ([type]): [description]
+    """
+    # Read data from the s3
+    input_data = os.path.join(
+        input_data,
+        "sas_data/part-00000-b9542815-7a8d-45fc-9c67-c9c5007ad0d4-c000.snappy.parquet",
+    )
+    demographic_df = spark.read.csv(input_data, inferSchema=True, header=True, sep=";")
+
+    # Remove duplicate using pivoting column
+    # Pivot column Race to different columns
+    pivot_cols = ["City", "State"]
+    pivot_df = demographic_df.groupBy(pivot_cols).pivot("Race").sum("Count")
+
+    # Joining the pivot
+    demographic_df = demographic_df.join(other=pivot_df, on=pivot_cols)
+
+
 def main():
     spark = create_spark_session()
     input_data = "./data"
