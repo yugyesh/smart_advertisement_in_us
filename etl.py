@@ -289,6 +289,10 @@ def process_airports_data(spark, input_data, output_data):
         [F.col(col).alias(col.replace(" ", "")) for col in airport_df.columns]
     )
 
+    # Exclude airports outside of us
+    airport_df = airport_df.filter(airport_df.iso_country.like("%US%"))
+
+
 
 def main():
     spark = create_spark_session()
