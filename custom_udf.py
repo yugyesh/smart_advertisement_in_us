@@ -1,7 +1,8 @@
 import os
 import json
-from pyspark.sql.types import IntegerType, StringType
+from pyspark.sql.types import IntegerType, StringType, DateType
 from pyspark.sql.functions import udf
+from datetime import datetime, timedelta
 
 
 def assign_value(col_name, key):
@@ -19,6 +20,14 @@ def assign_value(col_name, key):
     return data[key] if key in data else None
 
 
+def convert_datetime(x):
+    try:
+        start = datetime(1960, 1, 1)
+        return start + timedelta(days=int(x))
+    except:
+        return None
+
+
 get_mode_udf = udf(lambda x: assign_value(key=x, col_name="i94mode"), StringType())
 
 get_city_udf = udf(lambda x: assign_value(key=x, col_name="i94port"), StringType())
@@ -28,3 +37,5 @@ get_state_udf = udf(lambda x: assign_value(key=x, col_name="i94addr"), StringTyp
 get_origin_udf = udf(lambda x: assign_value(key=x, col_name="i94cit"), StringType())
 
 get_visa_udf = udf(lambda x: assign_value(key=x, col_name="i94visa"), StringType())
+
+udf_datetime_from_sas = udf(lambda x: convert_datetime(x), DateType())
