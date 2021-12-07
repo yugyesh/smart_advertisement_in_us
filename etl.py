@@ -299,6 +299,21 @@ def process_airports_data(spark, input_data, output_data):
     # Retrive state_name from state code
     airport_df = airport_df.withColumn("state", get_state_udf(airport_df.state_code))
 
+    # Remove unwanted columns
+    airport_delete_cols = [
+        "elevation_ft",
+        "continent",
+        "iso_country",
+        "iso_region",
+        "gps_code",
+        "iata_code",
+        "local_code",
+        "coordinates",
+        "state_code",
+    ]
+    airport_df = airport_df.drop(*airport_delete_cols)
+    
+
 
 
 def main():
