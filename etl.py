@@ -275,6 +275,21 @@ def process_cities_demographics(spark, input_data, output_data):
     demographic_df.write.mode("overwrite").parquet(output_data)
 
 
+def process_airports_data(spark, input_data, output_data):
+
+    # Read data from the s3
+    input_data = os.path.join(
+        input_data,
+        "airport_codes.csv",
+    )
+    airport_df = spark.read.csv(input_data, header=True, sep=",")
+
+    # Remove extra whitespace in column
+    airport_df = airport_df.select(
+        [F.col(col).alias(col.replace(" ", "")) for col in airport_df.columns]
+    )
+
+
 def main():
     spark = create_spark_session()
     input_data = "./data"
