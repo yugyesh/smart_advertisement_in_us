@@ -317,6 +317,9 @@ def process_airports_data(spark, input_data, output_data):
     airport_df = airport_df.dropDuplicates()
     airport_df = airport_df.withColumn("airport_id", monotonically_increasing_id())
 
+    # Rename munacipality to city
+    airport_df = airport_df.withColumnRenamed("municipality", "city")
+
 
 def main():
     spark = create_spark_session()
