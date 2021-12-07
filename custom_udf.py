@@ -40,3 +40,5 @@ get_origin_udf = udf(lambda x: assign_value(key=x, col_name="i94cit"), StringTyp
 get_visa_udf = udf(lambda x: assign_value(key=x, col_name="i94visa"), StringType())
 
 udf_datetime_from_sas = udf(lambda x: convert_datetime(x), DateType())
+
+get_state_code_udf = udf(lambda x: x if x is None else x.split("-")[1])

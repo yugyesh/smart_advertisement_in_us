@@ -278,6 +278,7 @@ def process_cities_demographics(spark, input_data, output_data):
 def process_airports_data(spark, input_data, output_data):
 
     # Read data from the s3
+    # TODO: Take filename from environment
     input_data = os.path.join(
         input_data,
         "airport_codes.csv",
@@ -291,6 +292,12 @@ def process_airports_data(spark, input_data, output_data):
 
     # Exclude airports outside of us
     airport_df = airport_df.filter(airport_df.iso_country.like("%US%"))
+
+    # Create state column code using iso_region
+    airport_df = airport_df.withColumn("state_code", get_state_code_udf("iso_region"))
+
+    # Retrive state_name from state code
+    airport_df = airport_df.withColumn("state", get_state_udf(airport_df.state_code))
 
 
 
