@@ -57,6 +57,7 @@ def process_immigration_data(spark, input_data, output_data):
     """
 
     # Read data from the s3
+    # TODO: Exceptional handline while reading files
     input_data = os.path.join(
         input_data,
         "sas_data/part-00000-b9542815-7a8d-45fc-9c67-c9c5007ad0d4-c000.snappy.parquet",
@@ -172,10 +173,10 @@ def process_immigration_data(spark, input_data, output_data):
     ).withColumn("departure_date", udf_datetime_from_sas(immigration_df.departure_date))
 
     # Write parquet data to parking
+    # TODO: Automatically create bucket if not exists
     immigration_df.write.mode("overwrite").parquet(
         os.path.join(output_data, "immigration")
     )
-    return immigration_df
 
 
 def process_cities_demographics(spark, input_data, output_data):
@@ -325,21 +326,54 @@ def process_airports_data(spark, input_data, output_data):
     # Reorder columns
     airport_df = airport_df.select(["airport_id", "name", "city", "state", "type"])
 
+    # Remove unwanted space from the column value
+    airport_df = (
+        airport_df.withColumn(
+            "name",
+            remove_whitespace_udf(airport_df.name)
+            if airport_df.name.isNotNull
+            else airport_df.name,
+        )
+        .withColumn(
+            "city",
+            remove_whitespace_udf(airport_df.city)
+            if airport_df.city.isNotNull
+            else airport_df.city,
+        )
+        .withColumn(
+            "state",
+            remove_whitespace_udf(airport_df.state)
+            if airport_df.state.isNotNull
+            else airport_df.state,
+        )
+        .withColumn(
+            "type",
+            remove_whitespace_udf(airport_df.type)
+            if airport_df.type.isNotNull
+            else airport_df.type,
+        )
+    )
+
+    return airport_df
+
     # Write data to parquet file
     # TODO: Partition the data
-    airport_df.write.mode("overwrite").parquet(os.path.join(output_data, "demographic"))
+    airport_df.write.mode("overwrite").parquet(os.path.join(output_data, "airport"))
 
 
 def main():
     spark = create_spark_session()
     input_data = "./data"
+    output_data = "./data/processed_data/"
     process_immigration_data(
-        spark=spark, input_data=input_data, output_data="/data/processed_data/"
+        spark=spark, input_data=input_data, output_data=output_data
     )
 
     process_cities_demographics(
-        spark=spark, input_data=input_data, output_data="/data/processed_data/"
+        spark=spark, input_data=input_data, output_data=output_data
     )
+
+    process_airports_data(spark=spark, input_data=input_data, output_data=output_data)
 
 
 if __name__ == "__main__":
