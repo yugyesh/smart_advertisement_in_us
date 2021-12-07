@@ -6,7 +6,8 @@ from datetime import datetime, timedelta
 
 
 def assign_value(col_name, key):
-    ROOT = "./lookup/"
+    # TODO read root from cfg file
+    ROOT = "./data/lookup/"
     key = str(key)
     col_name = col_name.lower()
 
