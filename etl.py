@@ -312,8 +312,10 @@ def process_airports_data(spark, input_data, output_data):
         "state_code",
     ]
     airport_df = airport_df.drop(*airport_delete_cols)
-    
 
+    # Dropping duplicate by excluding ident
+    airport_df = airport_df.dropDuplicates()
+    airport_df = airport_df.withColumn("airport_id", monotonically_increasing_id())
 
 
 def main():
