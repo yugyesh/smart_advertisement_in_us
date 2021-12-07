@@ -37,7 +37,17 @@ def create_spark_session():
     return spark
 
 
-def process_immigration_data(spark, input_data):
+def process_immigration_data(spark, input_data, output_data):
+    """[summary]
+
+    Args:
+        spark ([type]): [description]
+        input_data ([type]): [description]
+        output_data ([type]): [description]
+
+    Returns:
+        [type]: [description]
+    """
 
     # Read data from the s3
     input_data = os.path.join(
@@ -154,13 +164,19 @@ def process_immigration_data(spark, input_data):
         "arrival_date", udf_datetime_from_sas(immigration_df.arrival_date)
     ).withColumn("departure_date", udf_datetime_from_sas(immigration_df.departure_date))
 
+    # Write parquet data to parking
+    immigration_df.write.mode("overwrite").parquet(
+        os.path.join(output_data, "immigration")
+    )
     return immigration_df
 
 
 def main():
     spark = create_spark_session()
     input_data = "./data"
-    process_immigration_data(spark=spark, input_data=input_data)
+    process_immigration_data(
+        spark=spark, input_data=input_data, output_data="/data/processed_data/"
+    )
 
 
 if __name__ == "__main__":
