@@ -172,12 +172,19 @@ def process_immigration_data(spark, input_data, output_data):
 
 
 def process_cities_demographics(spark, input_data, output_data):
-    """[summary]
+    """This method transforms the demographics data using following steps:
+        - Remove duplicate using pivoting column
+        - Remove unwanted columns from schema
+        - Dropping duplicate
+        - Convert column names
+        - Fill null with 0
+        - Append auto increment id column
+        - Reorder the schema
 
     Args:
-        spark ([type]): [description]
-        input_data ([type]): [description]
-        output_data ([type]): [description]
+        [Object]: pyspark.sql.session.SparkSession object
+        input_data (string): path of s3 for input json file
+        output_data (string): s3 path to write parquet tables
     """
     # Read data from the s3
     input_data = os.path.join(
