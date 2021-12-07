@@ -58,6 +58,7 @@ def process_immigration_data(spark, input_data, output_data):
 
     # Read data from the s3
     # TODO: Exceptional handline while reading files
+    # TODO: Give sas folder from the environment variable or json file
     input_data = os.path.join(
         input_data,
         "sas_data/part-00000-b9542815-7a8d-45fc-9c67-c9c5007ad0d4-c000.snappy.parquet",
@@ -279,7 +280,21 @@ def process_cities_demographics(spark, input_data, output_data):
 
 
 def process_airports_data(spark, input_data, output_data):
-
+    """This method transforms the airports data using following steps:
+        - Remove extra whitespace in column
+        - Exclude airport outside of US
+        - Dropping duplicate by excluding ident
+        - Remove unwanted cols
+        - Dropping duplicate by excluding ident
+        - Rename municipality to city
+        - Reorder the columns
+        - remove whitespace from all the data
+        - filter out closed, balloon and heliport types
+    Args:
+        [Object]: pyspark.sql.session.SparkSession object
+        input_data (string): path of s3 for input json file
+        output_data (string): s3 path to write parquet tables
+    """
     # Read data from the s3
     # TODO: Take filename from environment
     input_data = os.path.join(
@@ -354,7 +369,14 @@ def process_airports_data(spark, input_data, output_data):
         )
     )
 
-    return airport_df
+    # Exclude unused airport
+    used_airports = [
+        "seaplane_base",
+        "medium_airport",
+        "small_airport",
+        "large_airport",
+    ]
+    airport_df = airport_df.filter(airport_df.type.isin(used_airports))
 
     # Write data to parquet file
     # TODO: Partition the data
