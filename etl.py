@@ -195,10 +195,20 @@ def process_cities_demographics(spark, input_data, output_data):
     demographic_df = demographic_df.join(other=pivot_df, on=pivot_cols)
 
     # Remove unwanted columns from schema
-    del_cols = ["median age", "Number of Veterans", "foreign-born", "Average Household Size", "State Code", "race", "count"]
+    del_cols = [
+        "median age",
+        "Number of Veterans",
+        "foreign-born",
+        "Average Household Size",
+        "State Code",
+        "race",
+        "count",
+    ]
     demographic_df = demographic_df.drop(*del_cols)
 
-    
+    # Droping duplicates
+    demographic_df = demographic_df.dropDuplicates()
+
 
 def main():
     spark = create_spark_session()
