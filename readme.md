@@ -143,4 +143,50 @@ The data should be updated once a month because it would be difficult get data f
 
 ### The database needed to be accessed by 100+ people.
 
-- I would have used developed endpoints using sql clinet, lambda function and api gateway.
+- The redshift supports concurrency scaling feature, which automatically adds additional cluster capacity to process an increase in both read and write queries. According to the aws documentation it could support virtually unlimited users and concurrent queries, [ref](https://docs.aws.amazon.com/redshift/latest/dg/concurrency-scaling.html).
+
+## Testing the developed model for a real client
+
+### CASE A
+
+An immigration consultation company focused on asian immigrants wants to boost their facebook adds on some specific cities, and thus they want to know top 10 cities with higher number of immigrants this year and total number of asians in that city.
+
+```
+select arrived_city, asian, count(*) as count
+from immigration i
+join demographics d
+on i.arrived_city = d.city
+group by arrived_city, asian
+order by count desc
+limit 10
+```
+
+<img src="./images/case_a.png" width="500">
+
+### CASE B
+
+A visa consultant specialize in visa consultation to Indian citizens wants to purchase bill board in airports. However they want select which state airports to target and their names.
+
+- Find the state with higher indain travellers
+
+```
+SELECT DISTINCT a.name as airport_name
+FROM airports a
+WHERE
+a.name LIKE '%International Airport%'
+AND
+a.state IN (
+  SELECT DISTINCT top_states.us_address
+  FROM
+  (
+  select DISTINCT us_address, count(*) as count
+  from immigration
+  where origin_city = 'INDIA'
+  group by us_address
+  order by count desc
+  limit 1
+  )AS top_states
+ ) 
+```
+
+<img src="./images/case_b.png" width="500">

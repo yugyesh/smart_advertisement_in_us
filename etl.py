@@ -86,6 +86,9 @@ def process_immigration_data(spark, input_data, output_data):
     immigration_df = immigration_df.dropDuplicates()
     immigration_df = immigration_df.withColumn("cicid", monotonically_increasing_id())
 
+    # Remove data that has Abu dabi airport as us port
+    immigration_df = immigration_df.filter(immigration_df.i94port != "MAA")
+
     # Assign 0 to null values for integer
     immigration_df = immigration_df.fillna(0, int_cols)
 
@@ -172,6 +175,10 @@ def process_immigration_data(spark, input_data, output_data):
     immigration_df = immigration_df.withColumn(
         "arrival_date", udf_datetime_from_sas(immigration_df.arrival_date)
     ).withColumn("departure_date", udf_datetime_from_sas(immigration_df.departure_date))
+
+    immigration_df = immigration_df.withColumn(
+        "arrived_city", upper_case_udf(immigration_df.arrived_city)
+    )
 
     # Write parquet data to parking
     # TODO: Automatically create bucket if not exists
@@ -273,9 +280,13 @@ def process_cities_demographics(spark, input_data, output_data):
         ]
     )
 
+    demographic_df = demographic_df.withColumn(
+        "city", upper_case_udf(demographic_df.city)
+    )
+
     # TODO: Partition the data
     demographic_df.write.mode("overwrite").parquet(
-        os.path.join(output_data, "demographic")
+        os.path.join(output_data, "demographics")
     )
 
 
@@ -378,9 +389,12 @@ def process_airports_data(spark, input_data, output_data):
     ]
     airport_df = airport_df.filter(airport_df.type.isin(used_airports))
 
+    # Make all city name upper case
+    airport_df = airport_df.withColumn("city", upper_case_udf(airport_df.city))
+
     # Write data to parquet file
     # TODO: Partition the data
-    airport_df.write.mode("overwrite").parquet(os.path.join(output_data, "airport"))
+    airport_df.write.mode("overwrite").parquet(os.path.join(output_data, "airports"))
 
 
 def main():

@@ -36,3 +36,30 @@ class DataQualityOperator(BaseOperator):
             self.log.info(
                 f"Data quality on table {table} check passed with {records[0][0]} records"
             )
+
+            # Check if the city names are all upper caps
+            column_name = {
+                "demographics": "city",
+                "immigration": "arrived_city",
+                "airports": "city",
+            }
+
+            self.log.info(f"yugesh Checking quality for {table}")
+
+            record = redshift_hook.get_records(
+                f"SELECT {column_name[table]} FROM {table}"
+            )
+            rec = 0
+            for i in range(len(record)):
+                if (
+                    record[i][0] is None
+                    or str(record[i][0]) == "None"
+                    or len(record[i][0]) == 0
+                ):
+                    continue
+
+                if str(record[i][0]).isupper() is False:
+                    raise ValueError(
+                        f"Data quality check failed in no upper case record {record[i][0]}"
+                    )
+                rec += 1

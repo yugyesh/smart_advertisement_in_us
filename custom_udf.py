@@ -44,3 +44,5 @@ udf_datetime_from_sas = udf(lambda x: convert_datetime(x), DateType())
 get_state_code_udf = udf(lambda x: x if x is None else x.split("-")[1])
 
 remove_whitespace_udf = udf(lambda x: str(x).strip())
+
+upper_case_udf = udf(lambda x: x.upper())
