@@ -61,7 +61,7 @@ def process_immigration_data(spark, input_data, output_data):
     # TODO: Give sas folder from the environment variable or json file
     input_data = os.path.join(
         input_data,
-        "sas_data",
+        "sas_data/part-00000-b9542815-7a8d-45fc-9c67-c9c5007ad0d4-c000.snappy.parquet",
     )
     immigration_df = spark.read.parquet(input_data)
 
@@ -380,6 +380,9 @@ def process_airports_data(spark, input_data, output_data):
         "large_airport",
     ]
     airport_df = airport_df.filter(airport_df.type.isin(used_airports))
+
+    # Make all city name upper case
+    airport_df = airport_df.withColumn("city", upper_case_udf(airport_df.city))
 
     # Write data to parquet file
     # TODO: Partition the data
