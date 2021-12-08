@@ -1,15 +1,15 @@
 CREATE TABLE IF NOT EXISTS public.demographics (
-	city_id bigint not null,
-	origin varchar(100),
+	demographic_id bigint not null,
+	city varchar(100),
 	state varchar(100),
 	american_indian_alaska_native bigint,
 	asian bigint,
 	black_african_american bigint,
 	hispanic_latino bigint,
 	white bigint,
-	female_population bigint,
 	male_population bigint,
 	total_population bigint
+	female_population bigint,
 );
 
 CREATE TABLE IF NOT EXISTS public.immigration (
