@@ -61,7 +61,7 @@ def process_immigration_data(spark, input_data, output_data):
     # TODO: Give sas folder from the environment variable or json file
     input_data = os.path.join(
         input_data,
-        "sas_data/part-00000-b9542815-7a8d-45fc-9c67-c9c5007ad0d4-c000.snappy.parquet",
+        "sas_data",
     )
     immigration_df = spark.read.parquet(input_data)
 
@@ -85,6 +85,9 @@ def process_immigration_data(spark, input_data, output_data):
     immigration_df = immigration_df.drop("cicid")
     immigration_df = immigration_df.dropDuplicates()
     immigration_df = immigration_df.withColumn("cicid", monotonically_increasing_id())
+
+    # Remove data that has Abu dabi airport as us port
+    immigration_df = immigration_df.filter(immigration_df.i94port != "MAA")
 
     # Assign 0 to null values for integer
     immigration_df = immigration_df.fillna(0, int_cols)
