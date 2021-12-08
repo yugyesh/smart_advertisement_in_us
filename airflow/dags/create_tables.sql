@@ -8,8 +8,8 @@ CREATE TABLE IF NOT EXISTS public.demographics (
 	hispanic_latino bigint,
 	white bigint,
 	male_population bigint,
-	total_population bigint
 	female_population bigint,
+	total_population bigint
 );
 
 CREATE TABLE IF NOT EXISTS public.immigration (
