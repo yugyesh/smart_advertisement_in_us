@@ -111,6 +111,37 @@ All of the collected data were stored in the s3 data lake without transforming. 
 
     <img src="./images/graph.png" width="500">
 
-## Project structure manual
 
-## Files description
+## Project writeup
+
+### Clearly state the rationale for the choice of tools and technologies for the project.
+
+During the development of the proposed smart advertisement system several tools and technologies were used as mentioned [above](##technology-used). I have selected each tools very carefully with consideration of project goal and time. For cloud I have selected amazon because of the following services:
+
+- Amazon s3: It is low cost, highly available, secure, infinitely scalable and easy to manage object storage service. This is perfect because effectiveness of the smart advertisement service will increases with the amount of data thus the service should increase the size of the datasets as much as possible.
+
+- Amazon EMR: This service enables us to easily transform our data using apache spark which is lightning fast analytics engine for big data.
+
+- Amazon Redshift: This service is a fast, easy, and secure cloud data warehousing service that provides high scalability. Since it is fast it is the best choice for developing api endpoints for dashboard and automatic advertisement in near future. 
+
+- Managed Apache Airflow: This service allows running of airflow without maintaining servers. The airflow is extremely important tool for monitoring etl tasks. It provides a visual representation of etl process, which is highly valuable for debugging and making discussion easier with data scientist and data analyst.
+
+Furthermore, I have used notion for project management and github for the version control. These two tool are must used tools for effective delivery of a product. Also, I have used python as a programming language because I love writing codes in python.
+
+### Propose how often the data should be updated and why ?
+
+The data should be updated once a month because it would be difficult get data from US National Tourism and Trade Office often since the data has to be requested. Also, in the real product we will be using huge amount, performing analysis on one month old data might have nearly same effectiveness.
+
+### How to approach the problem if the data was increased by 100x.
+    
+- Transforming data: Currently in EMR only one master and slave node are running, since the EMR is highly scalable, I would have used appropriate number of slaves. I would also have partitioned the immigration data by month while writing in parquet format.
+
+- Loading data to redshift: I would have increase the size of the warehouse and while copying the data from s3 to redshift I would have used template filed that would allow to load timestamped files from S3 based on the execution time and run backfills.
+
+### The data populates a dashboard that must be updated on a daily basis by 7am every day.
+
+- Use airflow to schedule and run pipelines
+
+### The database needed to be accessed by 100+ people.
+
+- I would have used developed endpoints using sql clinet, lambda function and api gateway.
