@@ -278,7 +278,7 @@ def process_cities_demographics(spark, input_data, output_data):
 
     # TODO: Partition the data
     demographic_df.write.mode("overwrite").parquet(
-        os.path.join(output_data, "demographic")
+        os.path.join(output_data, "demographics")
     )
 
 
@@ -386,7 +386,7 @@ def process_airports_data(spark, input_data, output_data):
 
     # Write data to parquet file
     # TODO: Partition the data
-    airport_df.write.mode("overwrite").parquet(os.path.join(output_data, "airport"))
+    airport_df.write.mode("overwrite").parquet(os.path.join(output_data, "airports"))
 
 
 def main():
