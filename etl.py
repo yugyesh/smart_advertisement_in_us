@@ -176,6 +176,10 @@ def process_immigration_data(spark, input_data, output_data):
         "arrival_date", udf_datetime_from_sas(immigration_df.arrival_date)
     ).withColumn("departure_date", udf_datetime_from_sas(immigration_df.departure_date))
 
+    immigration_df = immigration_df.withColumn(
+        "arrived_city", upper_case_udf(immigration_df.arrived_city)
+    )
+
     # Write parquet data to parking
     # TODO: Automatically create bucket if not exists
     immigration_df.write.mode("overwrite").parquet(
@@ -274,6 +278,10 @@ def process_cities_demographics(spark, input_data, output_data):
             "female_population",
             "total_population",
         ]
+    )
+
+    demographic_df = demographic_df.withColumn(
+        "city", upper_case_udf(demographic_df.city)
     )
 
     # TODO: Partition the data
