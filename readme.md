@@ -28,7 +28,7 @@ For this project I have used three data sources
 
 ## Explore data quality
 
-The exploration of data quality is performed using jupyter notebook in Step 2(Explore and Assess the Data). You could view the notebook from [here]("https://github.com/yugyesh/smart_advertisement_in_us/blob/dev/smart_advertisement_capstone.ipynb"). 
+The exploration of data quality is performed using jupyter notebook in Step 2(Explore and Assess the Data). You could view the notebook from [here]("https://github.com/yugyesh/smart_advertisement_in_us/blob/dev/smart_advertisement_capstone.ipynb") . 
 
 ## Data model
 
