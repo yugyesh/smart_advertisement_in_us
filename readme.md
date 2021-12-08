@@ -143,4 +143,4 @@ The data should be updated once a month because it would be difficult get data f
 
 ### The database needed to be accessed by 100+ people.
 
-- I would have used developed endpoints using sql clinet, lambda function and api gateway.
+- The redshift supports concurrency scaling feature, which automatically adds additional cluster capacity to process an increase in both read and write queries. According to the aws documentation it could support virtually unlimited users and concurrent queries, [ref](https://docs.aws.amazon.com/redshift/latest/dg/concurrency-scaling.html).
