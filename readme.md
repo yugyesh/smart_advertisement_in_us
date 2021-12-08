@@ -19,7 +19,6 @@ For this project I have used three data sources
 ## Technology used
 
 - Python
-- Postgres SQL
 - Apache Airflow
 - Amazon S3
 - Amazon EMR
@@ -29,7 +28,7 @@ For this project I have used three data sources
 
 ## Explore data quality
 
-The exploration of data quality is performed using jupyter notebook in Step 2(Explore and Assess the Data). You could view the notebook from [here](). 
+The exploration of data quality is performed using jupyter notebook in Step 2(Explore and Assess the Data). You could view the notebook from [here]("https://github.com/yugyesh/smart_advertisement_in_us/blob/dev/smart_advertisement_capstone.ipynb"). 
 
 ## Data model
 
@@ -133,7 +132,7 @@ Furthermore, I have used notion for project management and github for the versio
 The data should be updated once a month because it would be difficult get data from US National Tourism and Trade Office often since the data has to be requested. Also, in the real product we will be using huge amount, performing analysis on one month old data might have nearly same effectiveness.
 
 ### How to approach the problem if the data was increased by 100x.
-    
+
 - Transforming data: Currently in EMR only one master and slave node are running, since the EMR is highly scalable, I would have used appropriate number of slaves. I would also have partitioned the immigration data by month while writing in parquet format.
 
 - Loading data to redshift: I would have increase the size of the warehouse and while copying the data from s3 to redshift I would have used template filed that would allow to load timestamped files from S3 based on the execution time and run backfills.
