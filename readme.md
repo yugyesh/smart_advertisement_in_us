@@ -167,7 +167,7 @@ limit 10
 
 A visa consultant specialize in visa consultation to Indian citizens wants to purchase bill board in airports. However they want select which state airports to target and their names.
 
-- Find the state with higher indain travellers
+- Find the state with higher indian travellers
 
 ```
 SELECT DISTINCT a.name as airport_name
